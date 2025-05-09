@@ -21,13 +21,18 @@
       "important": false
     },
     {
-      "id": 5,
+      "id": "5",
       "content": "a new note...66665444",
       "important": false
     },
     {
-      "id": 6,
+      "id": "6",
       "content": "a new note...66665444",
+      "important": true
+    },
+    {
+      "id": 7,
+      "content": "a new note...333",
       "important": true
     }
   ]
