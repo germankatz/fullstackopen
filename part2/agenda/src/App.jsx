@@ -4,6 +4,7 @@ import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import personsServices from './services/persons'
+import Notification from './components/Notification'
 
 const App = () => {
 
@@ -11,6 +12,8 @@ const App = () => {
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
     const [filterText, setFilterText] = useState('')
+    const [messageType, setMessageType] = useState('')
+    const [message, setMessage] = useState('')
 
     useEffect(() => {
         personsServices.getAll().then((response) => {
@@ -43,7 +46,11 @@ const App = () => {
 
             if (existing) {
                 if (window.confirm(`${newName} is already added to your phonebook, replace the old number with a new one?`)) {
-                    updatePerson(existing)
+                    updatePerson(existing).catch(error => {
+                        if (error.status == 404) {
+                            showMessage(`${newName} has already been removed from server`, 'error')
+                        }
+                    })
                 }
             } else {
                 createPerson()
@@ -51,10 +58,21 @@ const App = () => {
         }
     }
 
+    const showMessage = (message, type) => {
+        setMessageType(type)
+        setMessage(message)
+        setTimeout(() => {
+            setMessage(null);
+        }, 3000);
+    }
+
     const createPerson = () => {
         const toCreate = { name: newName, number: newNumber }
         return personsServices.create(toCreate)
             .then(created => {
+                // Message
+                showMessage(`${newName} has been added`, 'success')
+                // Add to persons
                 setPersons(ps => ps.concat(created))
                 setNewName(""); setNewNumber("");
             })
@@ -64,6 +82,9 @@ const App = () => {
         const updated = { ...existing, number: newNumber }
         return personsServices.update(existing.id, updated)
             .then(returned => {
+                // Message
+                showMessage(`${newName} has been updated`, 'success')
+                // Update persons
                 setPersons(ps => ps.map(p => p.id !== returned.id ? p : returned))
                 setNewName(""); setNewNumber("");
             })
@@ -72,7 +93,14 @@ const App = () => {
     const handleDeletePerson = (id, name) => {
         if (window.confirm(`Delete ${name}?`)) {
             personsServices.deleteById(id).then(response => {
+                // Message
+                // showMessage(`${name} has been deleted`, 'success')
+                // Delete persons
                 setPersons(persons.filter(p => p.id != id))
+            }).catch(error => {
+                if (error.status == 404) {
+                    showMessage(`${name} has already been removed from server`, 'error')
+                }
             })
         }
     }
@@ -84,6 +112,7 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
+            <Notification type={messageType} message={message} />
             <Filter onFilterTextChange={handleFilterText} />
             <h3>add a new</h3>
             <PersonForm
