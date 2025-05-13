@@ -39,7 +39,8 @@ function App() {
     }
 
     const handleShowClick = (name) => {
-        handleSearchBox(name)
+        getSpecificCountry(name)
+
     }
 
     const getSpecificCountry = (countryName) => {
@@ -48,7 +49,7 @@ function App() {
                 console.log("response");
 
                 setSpecificCountry(response)
-
+                setCountriesShow([response])
             })
     }
 
