@@ -1,10 +1,6 @@
-const Country = ({ country }) => (
+const Country = ({ name, onShowClick }) => (
     <>
-        <h2>{country.name.official}</h2>
-        <div>
-            <p>Capital {country.capital[0]}</p>
-            <p>Area {country.area}</p>
-        </div>
+        <div>{name} <button onClick={onShowClick}>Show</button></div>
     </>
 )
 

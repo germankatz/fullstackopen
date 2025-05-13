@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import countriesService from './services/countries'
 import Notification from './components/Notification'
+import SpecificCountry from './components/SpecificCountry'
 import Country from './components/Country'
 
 function App() {
@@ -18,28 +19,36 @@ function App() {
 
     const handleSearchBox = (e) => {
         e.preventDefault()
+
         const searchValue = e.target.value
         setSearchText(searchValue)
 
-        // Filtrar paises
+        // Filter countries
         const filteredCountries = countries.filter(country =>
-            country.name.official.toLowerCase().includes(searchText.toLowerCase())
+            country.name.official.toLowerCase().includes(searchValue.toLowerCase())
         )
         setCountriesShow(filteredCountries)
 
         // Check if its only one
         if (filteredCountries.length === 1) {
-            getSpecificCountry()
+            getSpecificCountry(filteredCountries[0].name.common)
+        } else {
+            setSpecificCountry(null)
         }
+
     }
 
-    const getSpecificCountry = () => {
-        console.log("Busco a ", countriesShow[0]);
-        countriesService.getCountriesByName(countriesShow[0].name.common)
+    const handleShowClick = (name) => {
+        handleSearchBox(name)
+    }
+
+    const getSpecificCountry = (countryName) => {
+        countriesService.getCountriesByName(countryName)
             .then(response => {
-                console.log("Busqué especifico");
+                console.log("response");
 
                 setSpecificCountry(response)
+
             })
     }
 
@@ -47,12 +56,15 @@ function App() {
     if (countriesShow.length > 10) {
         content = <Notification message="Too many matches, specify another filter" />
     } else if (countriesShow.length === 1 && specificCountry) {
-        content = <Country country={specificCountry} />
+        content = <SpecificCountry country={specificCountry} />
     } else if (countriesShow.length === 0) {
-        content = null
+        content = <div>Country not found</div>
     } else {
         content = countriesShow.map(c =>
-            <div key={c.name.official}>{c.name.official}</div>
+            <Country
+                key={c.name.official}
+                name={c.name.official}
+                onShowClick={() => handleShowClick(c.name.official)} />
         )
     }
 
